@@ -117,35 +117,7 @@
             background-color: #fef2f2; /* Original light red */
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(220, 38, 38, 0.15);
-        }
-        
-        /* Header for logged-in users */
-        .header {
-            position: absolute;
-            top: 32px;
-            right: 32px;
-        }
-        
-        .dashboard-btn {
-            padding: 12px 24px;
-            /* Added pink mix to dashboard button */
-            background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(225, 38, 78, 1) 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 8px 22px rgba(225, 38, 78, 0.35);
-        }
-        
-        .dashboard-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 34px rgba(225, 38, 78, 0.45);
-            background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(210, 34, 70, 1) 100%);
-        }
-        
+        }    
         /* Add subtle pink background image */
         .welcome-bg {
             position: fixed;
@@ -234,12 +206,6 @@
     </style>
     </head>
     <body>
-        @auth
-        <div class="header">
-            <a href="{{ url('/dashboard') }}" class="dashboard-btn">Dashboard</a>
-        </div>
-        @endauth
-        
         <div class="welcome-container">
             <h1 class="logo">LedgerMate</h1>
             <p class="slogan">Smart accounting made simple</p>
