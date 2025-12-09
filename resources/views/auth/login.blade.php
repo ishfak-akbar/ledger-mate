@@ -18,11 +18,11 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 450px;         
+        width: 440px;         
         max-width: 85vw;
         pointer-events: none;
         z-index: 1;
-        opacity: 0.4;         
+        opacity: 0.2;         
     }
 
     .center-bg img {
@@ -203,25 +203,25 @@
     }
 
     .btn-signin {
-    width: 100%;
-    background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(220, 38, 38, 1) 100%);
-    color: white;
-    border: none;
-    padding: 12px;
-    margin-top: 14px;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
-    transition: all 0.3s;
-}
+        width: 100%;
+        background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(220, 38, 38, 1) 100%);
+        color: white;
+        border: none;
+        padding: 12px;
+        margin-top: 14px;
+        border-radius: 12px;
+        font-size: 17px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
+        transition: all 0.3s;
+    }
 
-.btn-signin:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 34px rgba(220, 38, 38, 0.45);
-    background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(200, 34, 34, 1) 100%);
-}
+    .btn-signin:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 34px rgba(220, 38, 38, 0.45);
+        background: radial-gradient(circle, rgba(255, 71, 71, 1) 40%, rgba(200, 34, 34, 1) 100%);
+    }
     .btn-signin img{
         margin-right: 2px;
         height: 14px;
@@ -240,9 +240,8 @@
         font-weight: 600;
         text-decoration: none;
     }
-
     .signup-link a:hover {
-        text-decoration: underline;
+        font-weight: 700;
     }
 </style>
 @endsection

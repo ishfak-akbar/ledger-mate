@@ -49,6 +49,11 @@
         margin-bottom: 20px;
     }
 
+    .left-desc span{
+        color: #dc2626;
+        
+    }
+
     .images-row {
         display: flex;
         align-items: flex-start;
@@ -68,6 +73,7 @@
         gap: 12px;
         max-width: 170px;
         aspect-ratio: 1/1;
+        box-shadow: 0 6px 18px rgba(220, 38, 78, 0.15);
     }
 
     .side-image{
@@ -171,7 +177,7 @@
     .login-link { 
         text-align: center;
         margin-top: 25px; 
-        font-size: 12.5px; 
+        font-size: 11px; 
         color: #666; 
     }
     .login-link a { 
@@ -180,7 +186,7 @@
         text-decoration: none; 
     }
     .login-link a:hover { 
-        text-decoration: underline; 
+        font-weight: 700; 
     }
 
     @media (max-width: 1024px) {
@@ -205,7 +211,7 @@
             <h1>Welcome</h1>
         </div>
         <div class="left-desc">
-            Step into the future of shop management with LedgerMate!
+            Step into the future of shop management with <span>LedgerMate!</span>
         </div>
         <div class="images-row">
             <div class="image-block">
