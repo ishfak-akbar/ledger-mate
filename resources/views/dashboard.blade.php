@@ -5,7 +5,7 @@
                 {{ __('Dashboard') }}
             </h2>
             <a href="{{ route('shops.create') }}" 
-               class="add-shop-btn">
+               class="add-first-shop-btn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -16,27 +16,116 @@
 
     <div class="dashboard-container">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Success Message -->
+            @if(session('success'))
+                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <div class="dashboard-card">
                 <div class="dashboard-content">
-                    <div class="text-center">
-                        <div class="shop-icon">
-                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    @if($shops->isEmpty())
+                        <div class="text-center py-8">
+                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                             </svg>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Welcome to Shop Manager</h3>
+                            <p class="text-gray-600 mb-6">
+                                {{ __("You're logged in!") }} Start by adding your first shop to manage transactions.
+                            </p>
+                            <a href="{{ route('shops.create') }}" 
+                               class="add-first-shop-btn">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Add Your First Shop
+                            </a>
                         </div>
-                        <a href="{{ route('shops.create') }}" 
-                           class="add-first-shop-btn">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Add Shop
-                        </a>
-                    </div>
+                    @else
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Your Shops ({{ $shops->count() }})</h3>
+                            <p class="text-gray-600 mb-6">
+                                Manage all your shops from this dashboard.
+                            </p>
+                        </div>
+
+                        <!-- Shops Grid -->
+                        <div class="shop-cards">
+                            @foreach($shops as $shop)
+                                <div class="shop-card">
+                                    <div class="shop-card-header">
+                                        <div class="flex justify-between items-start">
+                                            <h4 class="shop-name">{{ $shop->name }}</h4>
+                                            <span class="shop-category 
+                                                @if($shop->category == 'retail') category-retail
+                                                @elseif($shop->category == 'restaurant') category-restaurant
+                                                @elseif($shop->category == 'grocery') category-grocery
+                                                @else category-other @endif">
+                                                {{ ucfirst($shop->category) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="shop-card-body">
+                                        <div class="shop-info-item">
+                                            <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            <span class="shop-address">{{ Str::limit($shop->address, 60) }}</span>
+                                        </div>
+                                        
+                                        @if($shop->notes)
+                                        <div class="shop-info-item mt-3">
+                                            <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <span class="shop-notes">{{ Str::limit($shop->notes, 50) }}</span>
+                                        </div>
+                                        @endif
+                                        
+                                        <div class="shop-info-item mt-3">
+                                            <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span class="shop-date">Added {{ $shop->created_at->diffForHumans() }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="shop-card-footer">
+                                        <a href="{{ route('shops.show', $shop) }}" class="view-shop-btn">
+                                            View Details
+                                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Add Shop Card -->
+                        <div class="mt-8">
+                            <div class="add-shop-card">
+                                <div class="text-center py-8">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Add Another Shop</h4>
+                                    <p class="text-gray-600 mb-4">Expand your business by adding more shops</p>
+                                    <a href="{{ route('shops.create') }}" 
+                                       class="add-another-shop-btn">
+                                        Add New Shop
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-
     <style>
         .text-center{
             display: flex;
@@ -142,6 +231,188 @@
             
             .dashboard-title {
                 font-size: 1.125rem;
+            }
+        }
+         .dashboard-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            background: #f9fafb;
+        }
+
+        .dashboard-card {
+            background: white;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f3f4f6;
+        }
+
+        .dashboard-content {
+            padding: 1.5rem;
+        }
+
+        .add-first-shop-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .add-first-shop-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Shop Card Styles */
+        .shop-cards{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .shop-card {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            width: 100%;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #dc2626;
+        }
+
+        .shop-card-header {
+            padding: 1.25rem 1.25rem 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .shop-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .shop-category {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        .category-retail {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .category-restaurant {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .category-grocery {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .category-other {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .shop-card-body {
+            padding: 1rem 1.25rem;
+        }
+
+        .shop-info-item {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .shop-address {
+            font-size: 0.875rem;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .shop-notes {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .shop-date {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .shop-card-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid #f3f4f6;
+            background-color: #dc2626;
+            margin-top: auto;
+        }
+
+        .view-shop-btn {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .view-shop-btn:hover {
+            color: #b91c1c;
+            text-decoration: underline;
+        }
+
+        /* Add Shop Card */
+        .add-shop-card {
+            background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+            border: 2px dashed #fca5a5;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .add-another-shop-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            background: #dc2626;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .add-another-shop-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        /* Grid responsiveness */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
