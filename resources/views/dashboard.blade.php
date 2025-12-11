@@ -5,7 +5,7 @@
                 {{ __('Dashboard') }}
             </h2>
             <a href="{{ route('shops.create') }}" 
-               class="add-first-shop-btn">
+                class="add-first-shop-btn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -16,13 +16,29 @@
 
     <div class="dashboard-container">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Success Message -->
+            
             @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                    {{ session('success') }}
+                <div id="success-notification" 
+                    class="fixed top-0 left-0 right-0 z-50 transform -translate-y-full transition-all duration-500 ease-out flex justify-center">
+                    <div class="mx-auto max-w-md mt-4 flex justify-center">
+                        <div class="bg-green-500 text-white p-4 rounded-lg shadow-xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>{{ session('success') }}</span>
+                                </div>
+                                <button onclick="closeNotification()" class="text-white hover:text-gray-200 ml-4">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
-
             <div class="dashboard-card">
                 <div class="dashboard-content">
                     @if($shops->isEmpty())
@@ -43,14 +59,19 @@
                             </a>
                         </div>
                     @else
-                        <div class="mb-8">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Your Shops ({{ $shops->count() }})</h3>
-                            <p class="text-gray-600 mb-6">
-                                Manage all your shops from this dashboard.
-                            </p>
+                        <div class="flex justify-between items-center mb-8">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">My Shops ({{ $shops->count() }})</h3>
+                            </div>
+                            <a href="{{ route('shops.create') }}" 
+                               class="add-another-shop-btn">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Add Shop
+                            </a>
                         </div>
 
-                        <!-- Shops Grid -->
                         <div class="shop-cards">
                             @foreach($shops as $shop)
                                 <div class="shop-card">
@@ -95,43 +116,101 @@
                                     
                                     <div class="shop-card-footer">
                                         <a href="{{ route('shops.show', $shop) }}" class="view-shop-btn">
-                                            View Details
+                                            Enter Shop
                                             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                                             </svg>
                                         </a>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
-
-                        <!-- Add Shop Card -->
-                        <div class="mt-8">
-                            <div class="add-shop-card">
-                                <div class="text-center py-8">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Add Another Shop</h4>
-                                    <p class="text-gray-600 mb-4">Expand your business by adding more shops</p>
-                                    <a href="{{ route('shops.create') }}" 
-                                       class="add-another-shop-btn">
-                                        Add New Shop
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+    
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notification = document.getElementById('success-notification');
+            
+            if (notification) {
+                function showNotification() {
+                    notification.classList.remove('-translate-y-full');
+                    notification.classList.add('translate-y-0');
+                }
+                
+                function hideNotification() {
+                    notification.classList.remove('translate-y-0');
+                    notification.classList.add('-translate-y-full');
+                    
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 500);
+                }
+                
+                function autoCloseNotification() {
+                    setTimeout(hideNotification, 4000);
+                }
+                
+                window.closeNotification = function() {
+                    hideNotification();
+                };
+                
+                setTimeout(showNotification, 100);
+                
+                autoCloseNotification();
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        hideNotification();
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (notification && !notification.contains(e.target)) {
+                        hideNotification();
+                    }
+                });
+            }
+        });
+    </script>
+    @endif
     <style>
+        #success-notification {
+            pointer-events: auto;
+        }
+        
+        #success-notification .bg-green-500 {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+            }
+        }
+        
+        #success-notification button:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+
         .text-center{
             display: flex;
             justify-content: space-between;
         }
-        .add-shop-btn {
+
+        .add-first-shop-btn {
             display: inline-flex;
             align-items: center;
             padding: 10px 20px;
@@ -144,96 +223,17 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
         }
 
-        .add-shop-btn:hover {
+        .add-first-shop-btn:hover {
             background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
         }
 
-        .add-shop-btn:active {
+        .add-first-shop-btn:active {
             transform: translateY(0);
         }
 
-        /* .dashboard-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-            background: #f9fafb;
-        } */
-
-        /* .dashboard-card {
-            background: white;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid #f3f4f6;
-        } */
-
-        .dashboard-content {
-            padding: 1.5rem;
-        }
-
-        .shop-icon {
-            color: #dc2626;
-            margin-bottom: 1rem;
-        }
-
-        .dashboard-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 0.5rem;
-        }
-
-        .dashboard-subtitle {
-            color: #6b7280;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-            line-height: 1.5;
-        }
-
-        .add-first-shop-btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            font-weight: 600;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
-        }
-
-        .add-first-shop-btn:hover {
-            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
-        }
-
-        .add-first-shop-btn:active {
-            transform: translateY(-1px);
-        }
-
-        @media (max-width: 640px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-            
-            .dashboard-content {
-                padding: 1rem;
-            }
-            
-            .add-shop-btn,
-            .add-first-shop-btn {
-                padding: 8px 16px;
-                font-size: 0.875rem;
-            }
-            
-            .dashboard-title {
-                font-size: 1.125rem;
-            }
-        }
-         .dashboard-container {
+        .dashboard-container {
             padding-top: 2rem;
             padding-bottom: 2rem;
             background: #f9fafb;
@@ -251,27 +251,39 @@
             padding: 1.5rem;
         }
 
-        .add-first-shop-btn {
+        .dashboard-content .text-center .add-first-shop-btn {
+            padding: 12px 24px;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .dashboard-content .text-center .add-first-shop-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+        }
+        
+        .add-another-shop-btn {
             display: inline-flex;
             align-items: center;
-            padding: 12px 24px;
+            padding: 10px 20px;
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             color: white;
             font-weight: 600;
             border-radius: 8px;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
         }
 
-        .add-first-shop-btn:hover {
+        .add-another-shop-btn:hover {
             background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
         }
+
 
         /* Shop Card Styles */
         .shop-cards{
+            margin-top: 15px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
             gap: 20px;
@@ -369,50 +381,34 @@
         }
 
         .view-shop-btn {
-            display: inline-flex;
+            display: flex; 
+            justify-content: center; 
             align-items: center;
-            color: white;
             font-weight: 500;
             font-size: 0.875rem;
             text-decoration: none;
             transition: color 0.2s;
+            color: #ffffff;
         }
 
         .view-shop-btn:hover {
-            color: #b91c1c;
-            text-decoration: underline;
-        }
+            color: #fef2f2; 
+        } 
 
-        /* Add Shop Card */
-        .add-shop-card {
-            background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
-            border: 2px dashed #fca5a5;
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .add-another-shop-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            background: #dc2626;
-            color: white;
-            font-weight: 600;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .add-another-shop-btn:hover {
-            background: #b91c1c;
-            transform: translateY(-2px);
-        }
-
-        /* Grid responsiveness */
         @media (max-width: 768px) {
-            .grid {
+            .shop-cards {
                 grid-template-columns: 1fr;
+            }
+            .flex.justify-between.items-center.mb-8 {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .add-another-shop-btn {
+                margin-top: 1rem;
+            }
+            #success-notification .mx-auto {
+                margin-left: 1rem;
+                margin-right: 1rem;
             }
         }
     </style>
