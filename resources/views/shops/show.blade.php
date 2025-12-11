@@ -105,7 +105,7 @@
                         <h3 class="section-title">Quick Actions</h3>
                         
                         <div class="action-buttons">
-                            <a href="#" class="action-btn add-transaction-btn">
+                            <a href="{{ route('transactions.create', $shop) }}" class="action-btn add-transaction-btn">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
@@ -134,22 +134,32 @@
                             <div class="stats-grid">
                                 <div class="stat-item">
                                     <div class="stat-label">Total Transactions</div>
-                                    <div class="stat-value">0</div>
+                                    <div class="stat-value">{{ $shop->transactions()->count() }}</div>
                                 </div>
                                 
                                 <div class="stat-item">
-                                    <div class="stat-label">This Month</div>
-                                    <div class="stat-value">0</div>
+                                    <div class="stat-label">Total Amount</div>
+                                    <div class="stat-value">₹{{ number_format($shop->transactions()->sum('total_amount'), 2) }}</div>
                                 </div>
                                 
                                 <div class="stat-item">
-                                    <div class="stat-label">Total Revenue</div>
-                                    <div class="stat-value">₹0</div>
+                                    <div class="stat-label">Total Paid</div>
+                                    <div class="stat-value">₹{{ number_format($shop->transactions()->sum('paid_amount'), 2) }}</div>
                                 </div>
                                 
                                 <div class="stat-item">
-                                    <div class="stat-label">Avg. Transaction</div>
-                                    <div class="stat-value">₹0</div>
+                                    <div class="stat-label">Total Due</div>
+                                    <div class="stat-value">₹{{ number_format($shop->transactions()->sum('due_amount'), 2) }}</div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-label">Fully Paid</div>
+                                    <div class="stat-value">{{ $shop->transactions()->where('due_amount', 0)->count() }}</div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-label">Pending Payment</div>
+                                    <div class="stat-value">{{ $shop->transactions()->where('due_amount', '>', 0)->count() }}</div>
                                 </div>
                             </div>
                         </div>
