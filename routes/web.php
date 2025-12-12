@@ -5,6 +5,7 @@ use App\Http\Controllers\ShopController;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/shops', [ShopController::class, 'store'])->name('shops.store');
     Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
     Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show');
+
+    Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 });
 Route::prefix('shops/{shop}/transactions')->group(function () {
     Route::get('/create', [TransactionController::class, 'create'])->name('transactions.create');

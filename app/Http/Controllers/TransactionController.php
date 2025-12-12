@@ -60,16 +60,42 @@ class TransactionController extends Controller
             ->with('success', 'Transaction added successfully!');
     }
 
-    // View all transactions for a shop
+    // View all transactions for a shop (UPDATED WITH FILTERING)
     public function index(Shop $shop)
     {
         if ($shop->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $transactions = $shop->transactions()->latest()->paginate(20);
+        $query = $shop->transactions();
+        
+        // Search filter
+        if ($search = request('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('customer_phone', 'like', "%{$search}%");
+            });
+        }
+        
+        // Status filter
+        if ($status = request('status')) {
+            if ($status === 'paid') {
+                $query->where('due_amount', 0);
+            } elseif ($status === 'pending') {
+                $query->where('due_amount', '>', 0);
+            }
+        }
+        
+        // Payment method filter
+        if ($paymentMethod = request('payment_method')) {
+            $query->where('payment_method', $paymentMethod);
+        }
+        
+        $transactions = $query->latest()->paginate(20);
+        
+        // Calculate stats based on ALL transactions (not filtered)
         $stats = [
-            'total_transactions' => $transactions->total(),
+            'total_transactions' => $shop->transactions()->count(),
             'total_amount' => $shop->transactions()->sum('total_amount'),
             'total_paid' => $shop->transactions()->sum('paid_amount'),
             'total_due' => $shop->transactions()->sum('due_amount'),
@@ -88,5 +114,17 @@ class TransactionController extends Controller
         }
 
         return view('transactions.show', compact('shop', 'transaction'));
+    }
+
+     public function destroy(Transaction $transaction)
+    {
+        if ($transaction->shop->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $transaction->delete();
+        
+        return redirect()->back()
+            ->with('success', 'Transaction deleted successfully!');
     }
 }

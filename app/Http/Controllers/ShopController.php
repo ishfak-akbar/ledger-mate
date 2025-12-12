@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shop;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ShopController extends Controller
 {
@@ -46,5 +48,77 @@ class ShopController extends Controller
             abort(403);
         }
         return view('shops.show', compact('shop'));
+    }
+    public function dashboard(Request $request)
+    {
+        $user = Auth::user();
+        
+        //Get all shops for the user
+        $shops = Shop::where('user_id', $user->id)
+                    ->withCount('transactions')
+                    ->latest()
+                    ->get();
+        
+        //Get selected date from request or default to today
+        $selectedDate = $request->get('date', Carbon::today()->format('Y-m-d'));
+        
+        //Calculate daily summary from all shops
+        $dailySummary = $this->calculateDailySummary($user, $selectedDate);
+        
+        //Get daily transactions for the selected date
+        $dailyTransactions = $this->getDailyTransactions($user, $selectedDate);
+        
+        return view('dashboard', compact(
+            'shops', 
+            'dailySummary', 
+            'selectedDate', 
+            'dailyTransactions'
+        ));
+    }
+    
+    private function calculateDailySummary($user, $date)
+    {
+        $summary = [
+            'sales' => 0,
+            'transactions' => 0,
+            'due' => 0,
+            'received' => 0
+        ];
+        
+        $shops = Shop::where('user_id', $user->id)->get();
+        
+        foreach ($shops as $shop) {
+            $transactions = Transaction::where('shop_id', $shop->id)
+                ->whereDate('created_at', $date)
+                ->get();
+            
+            foreach ($transactions as $transaction) {
+                $summary['transactions']++;
+                $summary['sales'] += $transaction->total_amount;
+
+                if ($transaction->payment_status === 'paid') {
+                    $summary['received'] += $transaction->total_amount;
+                } elseif ($transaction->payment_status === 'partial') {
+                    $paidAmount = $transaction->paid_amount ?? 0;
+                    $summary['received'] += $paidAmount;
+                    $summary['due'] += ($transaction->total_amount - $paidAmount);
+                } else {
+                    $summary['due'] += $transaction->total_amount;
+                }
+            }
+        }
+        
+        return $summary;
+    }
+    
+    private function getDailyTransactions($user, $date)
+    {
+        return Transaction::whereHas('shop', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereDate('created_at', $date)
+            ->with('shop')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }
