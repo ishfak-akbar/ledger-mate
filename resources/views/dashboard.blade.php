@@ -233,7 +233,7 @@
             transform: translateY(0);
         }
 
-        .dashboard-container {
+        /* .dashboard-container {
             padding-top: 2rem;
             padding-bottom: 2rem;
             background: #f9fafb;
@@ -245,7 +245,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f3f4f6;
-        }
+        } */
 
         .dashboard-content {
             padding: 1.5rem;
