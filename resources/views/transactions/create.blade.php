@@ -106,6 +106,42 @@
                             @enderror
                         </div>
 
+                        <!-- Customer Search Section -->
+                        <div class="customer-search-section">
+                            <label class="form-label">Find Customer</label>
+                            <div class="search-container">
+                                <div class="search-input-group">
+                                    <input 
+                                        type="text" 
+                                        id="customer_search" 
+                                        placeholder="Enter name or phone number"
+                                        class="search-input"
+                                    >
+                                    <button type="button" onclick="searchCustomer()" class="search-btn">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        Find
+                                    </button>
+                                </div>
+                                
+                                <!-- Customer Results Dropdown -->
+                                <div id="customerResults" class="customer-results hidden">
+                                    <div class="results-header">
+                                        <span>Select a customer</span>
+                                        <button type="button" onclick="closeResults()" class="close-results">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div id="customerList" class="customer-list">
+                                        <!-- Customer results will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Customer Name -->
                         <div class="form-group">
                             <label for="customer_name" class="form-label">Customer Name</label>
@@ -192,9 +228,84 @@
             document.getElementById('due_amount').value = due.toFixed(2);
         }
 
+        // Search customer function
+        function searchCustomer() {
+            const searchTerm = document.getElementById('customer_search').value.trim();
+            
+            if (!searchTerm) {
+                alert('Please enter a name or phone number to search');
+                return;
+            }
+            
+            // Show loading state
+            const customerList = document.getElementById('customerList');
+            customerList.innerHTML = '<div class="loading">Searching...</div>';
+            
+            // Fetch customer data
+            fetch(`/api/shops/{{ $shop->id }}/search-customers?query=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        customerList.innerHTML = '<div class="no-results">No customers found</div>';
+                    } else {
+                        let html = '';
+                        data.forEach(customer => {
+                            html += `
+                                <div class="customer-item" onclick="selectCustomer(${JSON.stringify(customer).replace(/"/g, '&quot;')})">
+                                    <div class="customer-name">${customer.name || 'No Name'}</div>
+                                    <div class="customer-details">
+                                        <span class="customer-phone">${customer.phone || 'No Phone'}</span>
+                                        <span class="customer-transactions">${customer.transaction_count} transaction(s)</span>
+                                    </div>
+                                    ${customer.address ? `<div class="customer-address">${customer.address}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        customerList.innerHTML = html;
+                    }
+                    document.getElementById('customerResults').classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    customerList.innerHTML = '<div class="error">Error loading customers</div>';
+                });
+        }
+
+        // Select customer function
+        function selectCustomer(customer) {
+            document.getElementById('customer_name').value = customer.name || '';
+            document.getElementById('customer_phone').value = customer.phone || '';
+            document.getElementById('customer_address').value = customer.address || '';
+            document.getElementById('customer_search').value = '';
+            closeResults();
+        }
+
+        // Close results dropdown
+        function closeResults() {
+            document.getElementById('customerResults').classList.add('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const results = document.getElementById('customerResults');
+            const searchContainer = document.querySelector('.search-container');
+            
+            if (!searchContainer.contains(event.target)) {
+                results.classList.add('hidden');
+            }
+        });
+
         // Calculate due on page load
         document.addEventListener('DOMContentLoaded', function() {
             calculateDue();
+            
+            // Auto-search when pressing Enter in search field
+            document.getElementById('customer_search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchCustomer();
+                }
+            });
         });
     </script>
 
@@ -206,7 +317,6 @@
 
         .transaction-container {
             background: linear-gradient(120deg, #ffd4d4, #ffe8e8, rgba(255,255,255,0.7), #ffd4d4 80%);
-            /* padding: 10px 0; */
             min-height: calc(100vh - 64px);
             display: flex;
             flex-direction: column;
@@ -231,12 +341,6 @@
             transition: all 0.2s;
             padding: 8px 12px;
         }
-
-        /* .back-header-btn:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-1px);
-        } */
 
         .back-icon {
             margin-top: -5px;
@@ -269,7 +373,7 @@
         .form-wrapper {
             width: 100%;
             max-width: var(--form-width);
-            margin: 60px auto 0 auto; /* Added top margin to account for back button */
+            margin: 60px auto 0 auto;
             padding: 0 15px;
         }
 
@@ -300,8 +404,146 @@
             margin-bottom: 5px;
         }
 
-        .form-column {
+        /* Customer Search Section */
+        .customer-search-section {
+            margin-bottom: 15px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-input {
             flex: 1;
+            padding: 6px 13px;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+        }
+
+        .search-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* Customer Results Dropdown */
+        .customer-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .close-results {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .close-results:hover {
+            background: #f3f4f6;
+        }
+
+        .customer-list {
+            padding: 8px 0;
+        }
+
+        .customer-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .customer-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .customer-item:last-child {
+            border-bottom: none;
+        }
+
+        .customer-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .customer-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .customer-address {
+            font-size: 11px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .loading, .no-results, .error {
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
         }
 
         /* Form Elements */
@@ -439,6 +681,15 @@
             .form-footer {
                 flex-direction: column;
                 gap: 12px;
+            }
+            
+            .search-input-group {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
 

@@ -137,12 +137,12 @@
                             View Transactions
                         </a>
                         
-                        <a href="#" class="action-btn text-green-600 hover:bg-green-50 border-green-200" style="margin: 12px 0px;">
+                        <button onclick="openClearDueModal()" class="action-btn text-green-600 hover:bg-green-50 border-green-200" style="margin: 12px 0px; width: 100%; border: 1px solid; cursor: pointer;">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            Generate Report
-                        </a>
+                            Clear Due Payment
+                        </button>
                     </div>
 
                     <div class="bg-gray-50" style="margin-top: 20px; border-top: 1px solid #ddd;">
@@ -190,7 +190,7 @@
 
             </div>
         </div>
-    </div>
+    </div>  
 
     <!-- Delete Shop Modal -->
     <div id="deleteModal" class="hidden bg-opacity-50 overflow-y-auto h-full w-full z-50" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto;">
