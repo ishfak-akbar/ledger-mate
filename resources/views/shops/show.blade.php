@@ -1,5 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
+        @php
+            session(['current_shop' => $shop]);
+        @endphp
+        
         <div class="flex justify-between items-center py-2">
             <h2 class="text-xl font-bold text-gray-900 leading-tight">
                 Shop Details: {{ $shop->name }}
@@ -28,20 +32,6 @@
             @endif
 
             <div class="shop-grid-container">
-
-                {{-- Row 1: Shop Header & Primary Action --}}
-                <div class="shop-header">
-                    <div class="shop-header-content">
-                        <h1 class="shop-name">{{ $shop->name }}</h1>
-                        <div class="shop-category">
-                            <span class="category-label">Category:</span>
-                            <span class="badge {{ $shop->category }}">
-                                {{ ucfirst($shop->category) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
                 {{-- Row 2: Statistics & Key Info (3-column layout on large screens) --}}
                 <div class="grid-card-span-2 bg-white p-6 md:p-8">
                     <h3 class="section-title text-xl mb-6 text-red-600">Financial Summary</h3>
@@ -202,48 +192,11 @@
         .border-yellow-200 { border-color: #fde68a; }
         .bg-yellow-50 { background-color: #fffbeb; }
         .text-yellow-700 { color: #b45309; }
-        
-        .shop-header {
-            background-color: white;
-            padding: 4px 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: 100%;
-        }
-
-        @media (min-width: 640px) {
-            .shop-header {
-                padding: 20px 8px;
-            }
-        }
-
-        .shop-header-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px; 
-        }
-
-        .shop-name {
-            color: #dc2626;
-            font-size: 30px; 
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .shop-category {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
 
         .category-label {
             font-size: 18px; 
             font-weight: 500;
-            color: #4b5563;
+            color: #fff;
         }
 
         .shop-grid-container {
