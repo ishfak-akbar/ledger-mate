@@ -121,4 +121,19 @@ class ShopController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
     }
+    public function destroy(Shop $shop)
+    {
+        if ($shop->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $shop->transactions()->delete();
+
+        $shop->delete();
+        
+        session()->forget('current_shop');
+        
+        return redirect()->route('dashboard')
+            ->with('success', 'Shop "' . $shop->name . '" has been deleted successfully.');
+    }
 }
