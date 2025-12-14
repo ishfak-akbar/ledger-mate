@@ -18,30 +18,50 @@ class TransactionController extends Controller
         return view('transactions.create', compact('shop'));
     }
 
-    // Store new transaction
+    //Store new transaction
     public function store(Request $request, Shop $shop)
     {
         if ($shop->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0.01',
+        //Check if this is a due clearance transaction
+        $isDueClearance = $request->has('transaction_type') && $request->transaction_type === 'due_clearance';
+
+        //Common validation rules
+        $validationRules = [
             'paid_amount' => 'required|numeric|min:0',
             'customer_name' => 'nullable|string|max:100',
             'customer_phone' => 'nullable|string|max:20',
             'customer_address' => 'nullable|string',
             'description' => 'nullable|string',
-            'note' => 'nullable|string',
             'payment_method' => 'required|in:cash,card,bank_transfer,upi,cheque'
-        ]);
+        ];
 
-        // Calculate due amount
-        $total = $request->total_amount;
-        $paid = $request->paid_amount;
-        $due = $total - $paid;
+        //Add different validation for total_amount based on transaction type
+        if ($isDueClearance) {
+            $validationRules['total_amount'] = 'required|numeric|in:0';
+            $request->merge(['due_amount' => 0]);
+        } else {
+            $validationRules['total_amount'] = 'required|numeric|min:0.01';
+            $validationRules['note'] = 'nullable|string';
+        }
 
-        Transaction::create([
+        $request->validate($validationRules);
+
+        //Calculate values
+        if ($isDueClearance) {
+            $total = 0;
+            $paid = $request->paid_amount;
+            $due = 0;
+        } else {
+            $total = $request->total_amount;
+            $paid = $request->paid_amount;
+            $due = $total - $paid;
+        }
+
+        //Create transaction data
+        $transactionData = [
             'shop_id' => $shop->id,
             'user_id' => Auth::id(),
             'date' => now(),
@@ -52,15 +72,24 @@ class TransactionController extends Controller
             'customer_phone' => $request->customer_phone,
             'customer_address' => $request->customer_address,
             'description' => $request->description,
-            'note' => $request->note,
             'payment_method' => $request->payment_method
-        ]);
+        ];
+
+        if (!$isDueClearance) {
+            $transactionData['note'] = $request->note;
+        }
+
+        Transaction::create($transactionData);
+
+        $message = $isDueClearance 
+            ? 'Payment made successfully!' 
+            : 'Transaction added successfully!';
 
         return redirect()->route('shops.show', $shop)
-            ->with('success', 'Transaction added successfully!');
+            ->with('success', $message);
     }
 
-    // View all transactions for a shop (UPDATED WITH FILTERING)
+    //View all transactions for a shop
     public function index(Shop $shop)
     {
         if ($shop->user_id !== Auth::id()) {
@@ -69,7 +98,7 @@ class TransactionController extends Controller
 
         $query = $shop->transactions();
         
-        // Search filter
+        //Search filter
         if ($search = request('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
@@ -77,7 +106,7 @@ class TransactionController extends Controller
             });
         }
         
-        // Status filter
+        //Status filter
         if ($status = request('status')) {
             if ($status === 'paid') {
                 $query->where('due_amount', 0);
@@ -86,14 +115,14 @@ class TransactionController extends Controller
             }
         }
         
-        // Payment method filter
+        //Payment method filter
         if ($paymentMethod = request('payment_method')) {
             $query->where('payment_method', $paymentMethod);
         }
         
         $transactions = $query->latest()->paginate(20);
         
-        // Calculate stats based on ALL transactions (not filtered)
+        //Calculate stats based on ALL transactions
         $stats = [
             'total_transactions' => $shop->transactions()->count(),
             'total_amount' => $shop->transactions()->sum('total_amount'),
@@ -116,10 +145,15 @@ class TransactionController extends Controller
         return view('transactions.show', compact('shop', 'transaction'));
     }
 
-     public function destroy(Transaction $transaction)
+    //Destroy transaction
+    public function destroy(Shop $shop, Transaction $transaction)
     {
-        if ($transaction->shop->user_id !== Auth::id()) {
+        if ($shop->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
+        }
+        
+        if ($transaction->shop_id !== $shop->id) {
+            abort(404, 'Transaction not found for this shop.');
         }
         
         $transaction->delete();

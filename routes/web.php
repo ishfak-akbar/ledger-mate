@@ -28,13 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show');
     Route::delete('/shops/{shop}', [ShopController::class, 'destroy'])->name('shops.destroy');
 
-    Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
-});
-Route::prefix('shops/{shop}/transactions')->group(function () {
-    Route::get('/create', [TransactionController::class, 'create'])->name('transactions.create');
-    Route::post('/', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::get('/', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    Route::prefix('shops/{shop}/transactions')->group(function () {
+        Route::get('/create', [TransactionController::class, 'create'])->name('transactions.create');
+        Route::post('/', [TransactionController::class, 'store'])->name('transactions.store');
+        Route::get('/', [TransactionController::class, 'index'])->name('transactions.index');
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+        Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    });
 });
 
 Route::get('/api/shops/{shop}/search-customers', function (App\Models\Shop $shop) {
@@ -66,6 +66,35 @@ Route::get('/api/shops/{shop}/search-customers', function (App\Models\Shop $shop
         ->get();
     
     return response()->json($customers);
+})->middleware('auth');
+
+Route::get('/api/shops/{shop}/customer-summary', function (App\Models\Shop $shop) {
+    if ($shop->user_id !== Auth::id()) {
+        return response()->json([], 403);
+    }
+    
+    $name = request('name');
+    $phone = request('phone');
+    
+    if (!$name || !$phone) {
+        return response()->json(['total' => 0, 'paid' => 0, 'due' => 0]);
+    }
+    
+    $summary = $shop->transactions()
+        ->where('customer_name', $name)
+        ->where('customer_phone', $phone)
+        ->selectRaw('
+            SUM(total_amount) as total,
+            SUM(paid_amount) as paid,
+            SUM(due_amount) as due
+        ')
+        ->first();
+    
+    return response()->json([
+        'total' => $summary->total ?: 0,
+        'paid' => $summary->paid ?: 0,
+        'due' => $summary->due ?: 0
+    ]);
 })->middleware('auth');
 
 require __DIR__.'/auth.php';

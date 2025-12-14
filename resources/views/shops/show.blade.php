@@ -23,17 +23,22 @@
     </x-slot>
     <div>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-6 p-3 bg-green-100 text-green-700 border-l-4 border-green-500 rounded-r-lg shadow-sm font-medium text-sm">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <!-- Toast Container -->
+            <div
+            id="toastContainer"
+            style="
+                position: fixed;
+                top: 20px;
+                right: 1rem;
+                z-index: 50;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 20rem;
+                max-width: 100%;
+            "
+            ></div>
 
-            @if(session('error'))
-                <div class="mb-6 p-3 bg-red-100 text-red-700 border-l-4 border-red-500 rounded-r-lg shadow-sm font-medium text-sm">
-                    {{ session('error') }}
-                </div>
-            @endif
 
             <div class="shop-grid-container">
                 {{-- Row 2: Statistics & Key Info (3-column layout on large screens) --}}
@@ -66,7 +71,7 @@
                         </div>
                         <div class="stat-box stat-box-reddish">
                             <div class="stat-label">Total Due</div>
-                            <div class="stat-value">Tk. {{ number_format($dueAmount, 2) }}</div>
+                            <div class="stat-value">Tk. {{ number_format($totalAmount, 2) - number_format($paidAmount, 2)}}</div>
                             <div class="stat-icon">⏳</div>
                         </div>
                     </div>
@@ -151,11 +156,11 @@
                             <h4 class="subsection-title-red">Payment Status</h4>
                             <div class="space-y-3">
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-500">Fully Paid:</span>
+                                    <span class="text-gray-500">Paid transactions:</span>
                                     <span class="font-bold text-green-600">{{ $shop->transactions()->where('due_amount', 0)->count() }}</span>
                                 </div>
                                 <div class="flex justify-between text-sm">
-                                    <span class="text-gray-500">Pending Payment:</span>
+                                    <span class="text-gray-500">Due transactions:</span>
                                     <span class="font-bold text-red-600">{{ $shop->transactions()->where('due_amount', '>', 0)->count() }}</span>
                                 </div>
                             </div>
@@ -191,6 +196,360 @@
             </div>
         </div>
     </div>  
+    
+
+
+    <!-- Clear Due Payment Modal -->
+    <div id="clearDueModal" 
+        class="hidden" 
+        style="
+            background: rgba(0, 0, 0, 0.6); 
+            backdrop-filter: blur(8px); 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 50;
+            overflow-y: auto; 
+            padding: 40px 10px; 
+            justify-content: center;
+            align-items: center;
+        ">
+
+        <div style="
+            
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 600px; 
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: auto; 
+            position: relative;
+            padding: 0; 
+        ">
+            
+            <div style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 24px;
+                border-bottom: 1px solid #e5e7eb;
+                position: sticky; 
+                top: 0;
+                background-color: #ffffff;
+                z-index: 10;
+            ">
+                <h3 style="
+                    font-size: 1.25rem; 
+                    font-weight: 700; 
+                    color: #1f2937; 
+                    margin: 0;
+                ">Clear Due Payment</h3>
+                <button onclick="closeClearDueModal()" style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #9ca3af; 
+                    transition: color 0.2s;
+                " onmouseover="this.style.color='#4b5563'" onmouseout="this.style.color='#9ca3af'">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div style="padding: 24px;">
+                <form method="POST" action="{{ route('transactions.store', $shop) }}" id="clearDueForm">
+                    @csrf
+                    
+                    <input type="hidden" name="transaction_type" value="due_clearance">
+                    <input type="hidden" name="customer_name" id="modal_customer_name">
+                    <input type="hidden" name="customer_phone" id="modal_customer_phone">
+                    <input type="hidden" name="customer_address" id="modal_customer_address">
+                    
+                    <div id="searchStep" style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 8px;">Find Customer *</label>
+                        <div style="position: relative;">
+                            <div style="display: flex; gap: 8px;">
+                                <input 
+                                    type="text" 
+                                    id="due_customer_search" 
+                                    placeholder="Enter customer name or phone number"
+                                    style="
+                                        flex-grow: 1; 
+                                        padding: 10px 12px; 
+                                        border: 1px solid #d1d5db; 
+                                        border-radius: 6px; 
+                                        outline: none; 
+                                        font-size: 0.875rem; 
+                                        transition: border-color 0.2s, box-shadow 0.2s;
+                                    "
+                                    onfocus="this.style.borderColor='#dc2626'; this.style.boxShadow='0 0 0 1px #dc2626'"
+                                    onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                                >
+                                <button type="button" onclick="searchDueCustomer()" style="
+                                    padding: 10px 16px; 
+                                    background-color: #dc2626; 
+                                    color: #ffffff; 
+                                    border: none;
+                                    border-radius: 6px; 
+                                    cursor: pointer;
+                                    font-size: 0.875rem; 
+                                    font-weight: 500; 
+                                    transition: background-color 0.2s;
+                                    display: flex; 
+                                    align-items: center; 
+                                    gap: 4px;
+                                " onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
+                                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                    Search
+                                </button>
+                            </div>
+                            
+                            <div id="dueCustomerResults" class="customer-results hidden" style="
+                                position: absolute; 
+                                top: 100%; 
+                                left: 0; 
+                                right: 0; 
+                                background-color: #ffffff; 
+                                border: 1px solid #e5e7eb; 
+                                border-radius: 6px; 
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+                                margin-top: 4px; 
+                                z-index: 20; 
+                                max-height: 240px; 
+                                overflow-y: auto;
+                            ">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                    <span style="font-size: 0.875rem; font-weight: 500; color: #4b5563;">Select a customer</span>
+                                    <button type="button" onclick="closeDueResults()" style="background: none; border: none; cursor: pointer; color: #9ca3af;" onmouseover="this.style.color='#4b5563'" onmouseout="this.style.color='#9ca3af'">
+                                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div id="dueCustomerList" style="padding: 4px;">
+                                    </div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">Search for customer by name or phone number</p>
+                    </div>
+
+                    <div id="detailsStep" class="hidden">
+                        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                            <h4 style="font-size: 0.875rem; font-weight: 600; color: #1e40af; margin-bottom: 12px; border-bottom: 1px solid #dbeafe; padding-bottom: 8px;">Selected Customer</h4>
+                            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+                                <div>
+                                    <span style="font-size: 0.75rem; color: #3b82f6; display: block;">Name:</span>
+                                    <p style="font-size: 0.875rem; font-weight: 600; color: #1e40af; margin: 0;" id="selected_customer_name"></p>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: #3b82f6; display: block;">Phone:</span>
+                                    <p style="font-size: 0.875rem; font-weight: 600; color: #1e40af; margin: 0;" id="selected_customer_phone"></p>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: #3b82f6; display: block;">Address:</span>
+                                    <p style="font-size: 0.875rem; font-weight: 600; color: #1e40af; margin: 0;" id="selected_customer_address"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                            <h4 style="font-size: 0.875rem; font-weight: 600; color: #4b5563; margin-bottom: 12px;">Customer Financial Summary</h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+                                <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Total</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #10b981;" id="customer_total_amount">৳ 0.00</div>
+                                </div>
+                                
+                                <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Paid</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #3b82f6;" id="customer_paid_amount">৳ 0.00</div>
+                                </div>
+                                
+                                <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Due</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #dc2626;" id="customer_due_amount">৳ 0.00</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                            <h4 style="font-size: 0.875rem; font-weight: 600; color: #4b5563; margin-bottom: 12px;">Payment Details</h4>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label for="clear_due_amount" style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px;">
+                                    Payment Amount *
+                                    <span style="font-size: 0.75rem; color: #6b7280;">(Maximum: <span id="max_due_amount" style="font-weight: 600;">৳ 0.00</span>)</span>
+                                </label>
+                                <div style="position: relative;">
+                                    <div style="position: absolute; inset-block-start: 0; inset-inline-start: 0; padding-left: 12px; height: 100%; display: flex; align-items: center; pointer-events: none;">
+                                        <span style="color: #6b7280; font-size: 0.875rem;">৳</span>
+                                    </div>
+                                    <input 
+                                        type="number" 
+                                        id="clear_due_amount" 
+                                        name="paid_amount" 
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        min="0.01"
+                                        max="0"
+                                        style="
+                                            padding: 10px 12px 10px 28px;
+                                            width: 100%; 
+                                            border: 1px solid #d1d5db; 
+                                            border-radius: 6px; 
+                                            outline: none; 
+                                            font-size: 0.875rem;
+                                            transition: border-color 0.2s, box-shadow 0.2s;
+                                        "
+                                        onfocus="this.style.borderColor='#dc2626'; this.style.boxShadow='0 0 0 1px #dc2626'"
+                                        onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                                        required
+                                        oninput="validatePaymentAmount()"
+                                    >
+                                </div>
+                                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;" id="amount_hint">Enter the amount being paid to clear due</p>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <label for="clear_due_payment_method" style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Payment Method *</label>
+                                <select 
+                                    id="clear_due_payment_method" 
+                                    name="payment_method" 
+                                    style="
+                                        width: 100%; 
+                                        padding: 10px 12px; 
+                                        border: 1px solid #d1d5db; 
+                                        border-radius: 6px; 
+                                        outline: none; 
+                                        font-size: 0.875rem;
+                                        transition: border-color 0.2s, box-shadow 0.2s;
+                                    "
+                                    onfocus="this.style.borderColor='#dc2626'; this.style.boxShadow='0 0 0 1px #dc2626'"
+                                    onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                                    required
+                                >
+                                    <option value="" disabled selected>Select payment method</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                    <option value="upi">UPI</option>
+                                    <option value="cheque">Cheque</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="clear_due_description" style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px;">Description</label>
+                                <textarea 
+                                    id="clear_due_description" 
+                                    name="description" 
+                                    placeholder="(Optional)"
+                                    rows="2"
+                                    style="
+                                        width: 100%; 
+                                        padding: 10px 12px; 
+                                        border: 1px solid #d1d5db; 
+                                        border-radius: 6px; 
+                                        outline: none; 
+                                        font-size: 0.875rem;
+                                        resize: vertical;
+                                        transition: border-color 0.2s, box-shadow 0.2s;
+                                    "
+                                    onfocus="this.style.borderColor='#dc2626'; this.style.boxShadow='0 0 0 1px #dc2626'"
+                                    onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="date" value="{{ now()->format('Y-m-d') }}">
+                        <input type="hidden" name="total_amount" id="total_amount_field" value="0">
+                        <input type="hidden" name="due_amount" id="due_amount_field" value="0">
+                        <input type="hidden" name="transaction_type" value="due_clearance">
+                    </div>
+
+                    <div style="
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center;
+                        padding: 16px 24px; 
+                        border-top: 1px solid #e5e7eb;
+                        position: sticky; /* Sticky footer for scrollable content */
+                        bottom: 0;
+                        background-color: #ffffff;
+                        z-index: 10;
+                        margin: 0 -24px -24px -24px; /* Counteract padding to make footer full width */
+                        border-radius: 0 0 12px 12px; /* Match modal border radius */
+                    ">
+                        <button type="button" onclick="closeClearDueModal()" 
+                                style="
+                                    padding: 10px 16px; 
+                                    background-color: #e5e7eb; 
+                                    color: #374151; 
+                                    border: none;
+                                    border-radius: 6px; 
+                                    cursor: pointer;
+                                    font-size: 0.875rem; 
+                                    font-weight: 500; 
+                                    transition: background-color 0.2s;
+                                " onmouseover="this.style.backgroundColor='#d1d5db'" onmouseout="this.style.backgroundColor='#e5e7eb'">
+                            Cancel
+                        </button>
+                        
+                        <div style="display: flex; gap: 12px;">
+                            <button type="button" id="backButton" 
+                                    onclick="goBackToSearch()"
+                                    class="hidden"
+                                    style="
+                                        padding: 10px 16px; 
+                                        background-color: #3b82f6; 
+                                        color: #ffffff; 
+                                        border: none;
+                                        border-radius: 6px; 
+                                        cursor: pointer;
+                                        font-size: 0.875rem; 
+                                        font-weight: 500; 
+                                        transition: background-color 0.2s;
+                                    " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                                Back to Search
+                            </button>
+                            
+                            <button type="submit" 
+                                    id="clearDueSubmit"
+                                    disabled
+                                    style="
+                                        padding: 10px 16px; 
+                                        background-color: #10b981; /* Green for submit/success */
+                                        color: #ffffff; 
+                                        border: none;
+                                        border-radius: 6px; 
+                                        cursor: not-allowed; /* Visually indicate disabled state */
+                                        font-size: 0.875rem; 
+                                        font-weight: 500; 
+                                        display: flex; 
+                                        align-items: center; 
+                                        gap: 8px;
+                                        transition: background-color 0.2s;
+                                    ">
+                                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Clear Due Payment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Delete Shop Modal -->
     <div id="deleteModal" class="hidden bg-opacity-50 overflow-y-auto h-full w-full z-50" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto;">
@@ -428,7 +787,7 @@
         }
 
         .stat-label {
-            font-size: 14px; 
+            font-size: 16px; 
             font-weight: 500;
             margin-bottom: 8px; 
             opacity: 0.9;
@@ -655,10 +1014,411 @@
                 font-size: 11px;
             }
         }
+        /* Toast Notification Styles */
+        .toast {
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease-out;
+            margin-bottom: 8px;
+            max-width: 100%;
+        }
+
+        .toast-success {
+            background-color: #10b981;
+            color: white;
+            border-left: 4px solid #059669;
+        }
+
+        .toast-error {
+            background-color: #ef4444;
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+
+        .toast-info {
+            background-color: #3b82f6;
+            color: white;
+            border-left: 4px solid #2563eb;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 12px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
     </style>
 
     <script>
-        //Modal functions
+        function openClearDueModal() {
+            console.log('Opening modal');
+            const modal = document.getElementById('clearDueModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex'; 
+            resetClearDueForm();
+        }
+
+        function closeClearDueModal() {
+            console.log('Closing modal');
+            const modal = document.getElementById('clearDueModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none'; 
+        }
+
+        function resetClearDueForm() {
+            document.getElementById('due_customer_search').value = '';
+            
+            document.getElementById('searchStep').style.display = 'block';
+            document.getElementById('detailsStep').style.display = 'none';
+            
+            document.getElementById('backButton').style.display = 'none';
+
+            document.getElementById('clearDueSubmit').disabled = true;
+            
+            closeDueResults();
+        }
+
+        function goBackToSearch() {
+            document.getElementById('searchStep').style.display = 'block';
+            document.getElementById('detailsStep').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('clearDueSubmit').disabled = true;
+        }
+
+        function searchDueCustomer() {
+            const searchTerm = document.getElementById('due_customer_search').value.trim();
+            
+            if (!searchTerm) {
+                alert('Please enter a name or phone number to search');
+                return;
+            }
+            
+            //Show loading state
+            const customerList = document.getElementById('dueCustomerList');
+            customerList.innerHTML = '<div style="padding: 12px; text-align: center; color: #6b7280; font-size: 14px;">Searching...</div>';
+            
+            //Fetch customer data
+            fetch(`/api/shops/{{ $shop->id }}/search-customers?query=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        customerList.innerHTML = '<div style="padding: 12px; text-align: center; color: #6b7280; font-size: 14px;">No customers found</div>';
+                    } else {
+                        let html = '';
+                        data.forEach(customer => {
+                            html += `
+                                <div style="padding: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background-color 0.2s;" 
+                                    onmouseover="this.style.backgroundColor='#f9fafb'" 
+                                    onmouseout="this.style.backgroundColor='transparent'"
+                                    onclick="selectDueCustomer(${JSON.stringify(customer).replace(/"/g, '&quot;')})">
+                                    <div style="font-size: 14px; font-weight: 600; color: #111827;">${customer.name || 'No Name'}</div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; margin-top: 4px;">
+                                        <span>${customer.phone || 'No Phone'}</span>
+                                        <span>${customer.transaction_count} transaction(s)</span>
+                                    </div>
+                                    ${customer.address ? `<div style="font-size: 12px; color: #9ca3af; font-style: italic; margin-top: 4px;">${customer.address}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        customerList.innerHTML = html;
+                    }
+                    document.getElementById('dueCustomerResults').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    customerList.innerHTML = '<div style="padding: 12px; text-align: center; color: #ef4444; font-size: 14px;">Error loading customers</div>';
+                });
+        }
+
+        async function selectDueCustomer(customer) {
+            console.log('Selecting customer:', customer);
+            
+            //Display selected customer info
+            document.getElementById('selected_customer_name').textContent = customer.name || 'Not provided';
+            document.getElementById('selected_customer_phone').textContent = customer.phone || 'Not provided';
+            document.getElementById('selected_customer_address').textContent = customer.address || 'Not provided';
+            
+            //Set hidden form fields
+            document.getElementById('modal_customer_name').value = customer.name || '';
+            document.getElementById('modal_customer_phone').value = customer.phone || '';
+            document.getElementById('modal_customer_address').value = customer.address || '';
+            
+            closeDueResults();
+            
+            //Fetch customer financial summary
+            await fetchCustomerFinancialSummary(customer.name, customer.phone);
+            
+            // Show details step
+            document.getElementById('searchStep').style.display = 'none';
+            document.getElementById('detailsStep').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
+            document.getElementById('clearDueSubmit').disabled = false;
+        }
+
+        async function fetchCustomerFinancialSummary(customerName, customerPhone) {
+            try {
+                //Fetch customer's transaction summary
+                const response = await fetch(`/api/shops/{{ $shop->id }}/customer-summary?name=${encodeURIComponent(customerName)}&phone=${encodeURIComponent(customerPhone)}`);
+                const summary = await response.json();
+                
+                console.log('Customer summary:', summary);
+                
+                //Calculate due amount (total - paid)
+                const total = parseFloat(summary.total || 0);
+                const paid = parseFloat(summary.paid || 0);
+                const due = total - paid;
+                
+                //Update UI with financial summary
+                document.getElementById('customer_total_amount').textContent = `৳ ${total.toFixed(2)}`;
+                document.getElementById('customer_paid_amount').textContent = `৳ ${paid.toFixed(2)}`;
+                document.getElementById('customer_due_amount').textContent = `৳ ${due.toFixed(2)}`;
+                
+                //Set max payment amount
+                document.getElementById('clear_due_amount').max = due;
+                document.getElementById('max_due_amount').textContent = `৳ ${due.toFixed(2)}`;
+                
+                //Update hidden form fields
+                document.getElementById('total_amount_field').value = 0;
+                document.getElementById('due_amount_field').value = 0;
+                
+            } catch (error) {
+                console.error('Error fetching customer summary:', error);
+                //Set default values
+                document.getElementById('customer_total_amount').textContent = '৳ 0.00';
+                document.getElementById('customer_paid_amount').textContent = '৳ 0.00';
+                document.getElementById('customer_due_amount').textContent = '৳ 0.00';
+                document.getElementById('max_due_amount').textContent = '৳ 0.00';
+            }
+        }
+
+        function validatePaymentAmount() {
+            const paymentAmount = parseFloat(document.getElementById('clear_due_amount').value) || 0;
+            const maxDue = parseFloat(document.getElementById('clear_due_amount').max) || 0;
+            const amountHint = document.getElementById('amount_hint');
+            const submitButton = document.getElementById('clearDueSubmit');
+            
+            if (paymentAmount > maxDue) {
+                amountHint.innerHTML = `<span style="color: #dc2626;">Payment amount cannot exceed due amount of ৳ ${maxDue.toFixed(2)}</span>`;
+                submitButton.disabled = true;
+                submitButton.style.backgroundColor = '#9ca3af';
+                submitButton.style.cursor = 'not-allowed';
+            } else if (paymentAmount <= 0) {
+                amountHint.textContent = 'Please enter a valid payment amount (greater than 0)';
+                submitButton.disabled = true;
+                submitButton.style.backgroundColor = '#9ca3af';
+                submitButton.style.cursor = 'not-allowed';
+            } else {
+                amountHint.textContent = `Clearing ৳ ${paymentAmount.toFixed(2)} of ৳ ${maxDue.toFixed(2)} due`;
+                submitButton.disabled = false;
+                submitButton.style.backgroundColor = '#10b981';
+                submitButton.style.cursor = 'pointer';
+
+                submitButton.onmouseover = function() { this.style.backgroundColor = '#059669'; };
+                submitButton.onmouseout = function() { this.style.backgroundColor = '#10b981'; };
+            }
+        }
+
+        function closeDueResults() {
+            document.getElementById('dueCustomerResults').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up event listeners');
+
+            const searchInput = document.getElementById('due_customer_search');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchDueCustomer();
+                    }
+                });
+            }
+            
+            //Close modal when clicking outside of modal content
+            const modal = document.getElementById('clearDueModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    console.log('Modal clicked, target:', e.target);
+                    if (e.target === this) {
+                        closeClearDueModal();
+                    }
+                });
+            }
+            
+            //Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('clearDueModal');
+                    if (modal && modal.style.display !== 'none') {
+                        closeClearDueModal();
+                    }
+                }
+            });
+            
+            //Form submission validation
+            const clearDueForm = document.getElementById('clearDueForm');
+            if (clearDueForm) {
+                clearDueForm.addEventListener('submit', function(e) {
+                    const customerName = document.getElementById('modal_customer_name').value;
+                    const amount = document.getElementById('clear_due_amount').value;
+                    const paymentMethod = document.getElementById('clear_due_payment_method').value;
+                    const maxDue = parseFloat(document.getElementById('clear_due_amount').max) || 0;
+                    const paymentAmount = parseFloat(amount) || 0;
+                    
+                    if (!customerName) {
+                        e.preventDefault();
+                        alert('Please select a customer first');
+                        return;
+                    }
+                    
+                    if (!amount || paymentAmount <= 0) {
+                        e.preventDefault();
+                        alert('Please enter a valid payment amount (greater than 0)');
+                        return;
+                    }
+                    
+                    if (paymentAmount > maxDue) {
+                        e.preventDefault();
+                        alert(`Payment amount cannot exceed due amount of ৳ ${maxDue.toFixed(2)}`);
+                        return;
+                    }
+                    
+                    if (!paymentMethod) {
+                        e.preventDefault();
+                        alert('Please select a payment method');
+                        return;
+                    }
+                    
+                    const confirmationMessage = `Create due clearance transaction for ${customerName}?\n\nAmount: ৳ ${paymentAmount.toFixed(2)}\nPayment Method: ${paymentMethod}`;
+                    
+                    if (!confirm(confirmationMessage)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            const results = document.getElementById('dueCustomerResults');
+            const searchContainer = document.querySelector('#clearDueModal .search-container');
+            
+            if (results && searchContainer && !searchContainer.contains(event.target)) {
+                results.style.display = 'none';
+            }
+        });
+
+        const paymentAmountInput = document.getElementById('clear_due_amount');
+        if (paymentAmountInput) {
+            paymentAmountInput.addEventListener('input', function() {
+                validatePaymentAmount();
+            });
+        }
+
+        const submitButton = document.getElementById('clearDueSubmit');
+        if (submitButton && submitButton.disabled) {
+            submitButton.style.backgroundColor = '#9ca3af';
+            submitButton.style.cursor = 'not-allowed';
+        }
+
+        // Toast Notification Functions
+        function showToast(message, type = 'success', duration = 5000) {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const messageEl = document.createElement('span');
+            messageEl.textContent = message;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'toast-close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => removeToast(toast);
+            
+            toast.appendChild(messageEl);
+            toast.appendChild(closeBtn);
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                removeToast(toast);
+            }, duration);
+            
+            return toast;
+        }
+
+        function removeToast(toast) {
+            toast.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        //Check for session messages and show toasts
+        function checkSessionMessages() {
+            if(session('success'))
+                showToast("{{ session('success') }}", 'success');
+            endif
+            
+            if(session('error'))
+                showToast("{{ session('error') }}", 'error');
+            endif
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMessage = "{{ session('success') }}";
+            const errorMessage = "{{ session('error') }}";
+            
+            if (successMessage) {
+                showToast(successMessage, 'success');
+            }
+            
+            if (errorMessage) {
+                showToast(errorMessage, 'error');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSessionMessages();
+        });
+
         function openDeleteModal() {
             document.getElementById('deleteModal').classList.remove('hidden');
             document.getElementById('shopNameInput').value = '';
