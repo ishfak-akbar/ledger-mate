@@ -20,7 +20,7 @@
                 $totalTransactions = $shop->transactions()->count();
                 $totalAmount = $shop->transactions()->sum('total_amount');
                 $totalPaid = $shop->transactions()->sum('paid_amount');
-                $totalDue = $shop->transactions()->sum('due_amount');
+                $totalDue = $totalAmount - $totalPaid;
                 $completedTransactions = $shop->transactions()->where('due_amount', 0)->count();
                 $pendingTransactions = $shop->transactions()->where('due_amount', '>', 0)->count();
             @endphp
@@ -166,11 +166,10 @@
                                             <div class="action-buttons-group">
                                                 <a href="{{ route('transactions.show', [$shop, $transaction]) }}" 
                                                    class="text-blue-dark hover:text-blue-darkest"
-                                                   title="View Details">
+                                                   title="Print Receipt">
                                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                     </svg>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                                    </svg>
                                                 </a>
                                                 <form action="{{ route('transactions.destroy', [$shop, $transaction]) }}" 
                                                     method="POST" 
@@ -301,12 +300,6 @@
             transition: all 0.2s;
             padding: 8px 12px;
         }
-
-        /* .back-header-btn:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-1px);
-        } */
 
         .back-icon {
             margin-top: -5px;
@@ -712,29 +705,46 @@
             display: flex;
             align-items: center;
         }
+
         .pagination-links nav > div {
             display: flex;
             align-items: center;
             gap: 4px;
         }
+
         .pagination-links a, .pagination-links span {
             padding: 8px 12px;
             margin: 0 2px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
+            border: 1px solid #e5e7eb; 
+            border-radius: 6px;
             font-size: 14px;
-            color: var(--color-gray-dark);
+            background-color: #ffffff;
+            color: #4b5563; 
             text-decoration: none;
-            transition: background-color 0.15s ease-in-out;
+            transition: all 0.2s ease-in-out;
+            min-width: 40px;
+            text-align: center;
         }
+
         .pagination-links a:hover {
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; 
+            border-color: #d1d5db;
+            color: #1f2937; 
         }
+
+        .pagination-links .disabled span {
+            color: #9ca3af; 
+            background-color: #f9fafb; 
+            border-color: #e5e7eb; 
+            cursor: not-allowed;
+        }
+
         .pagination-links span[aria-current="page"] {
-            background-color: var(--color-red);
-            border-color: var(--color-red);
-            color: var(--color-white);
+            background-color: #dc2626; 
+            border-color: #dc2626; 
+            color: #ffffff; 
             font-weight: 700;
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2); 
         }
     </style>
 </x-guest-layout>
