@@ -1,6 +1,5 @@
 <x-guest-layout>
     <div class="transaction-container">
-        <!-- Back Button positioned at top left corner -->
         <div class="back-button-container">
             <a href="{{ route('shops.show', $shop) }}" class="back-header-btn">
                 <span class="back-icon"><</span>
@@ -45,7 +44,7 @@
                                 type="number" 
                                 id="paid_amount" 
                                 name="paid_amount" 
-                                value="{{ old('paid_amount', 0) }}" 
+                                value="{{ old('paid_amount') }}" 
                                 placeholder="0.00"
                                 step="0.01"
                                 min="0"
@@ -58,7 +57,7 @@
                             @enderror
                         </div>
 
-                        <!-- Due Amount (Auto-calculated, Readonly) -->
+                        <!-- Due Amount -->
                         <div class="form-group">
                             <label for="due_amount" class="form-label">Due</label>
                             <input 
@@ -136,7 +135,6 @@
                                         </button>
                                     </div>
                                     <div id="customerList" class="customer-list">
-                                        <!-- Customer results will be loaded here -->
                                     </div>
                                 </div>
                             </div>
@@ -205,7 +203,7 @@
                         </div>
                     </div>
 
-                    <!-- Hidden Date Field (Current Date) -->
+                    <!-- Hidden Date Field -->
                     <input type="hidden" name="date" value="{{ now()->format('Y-m-d') }}">
 
                     <!-- Submit Button -->
@@ -228,7 +226,7 @@
             document.getElementById('due_amount').value = due.toFixed(2);
         }
 
-        // Search customer function
+        //Search customer function
         function searchCustomer() {
             const searchTerm = document.getElementById('customer_search').value.trim();
             
@@ -237,11 +235,10 @@
                 return;
             }
             
-            // Show loading state
             const customerList = document.getElementById('customerList');
             customerList.innerHTML = '<div class="loading">Searching...</div>';
             
-            // Fetch customer data
+            //Fetch customer data
             fetch(`/api/shops/{{ $shop->id }}/search-customers?query=${encodeURIComponent(searchTerm)}`)
                 .then(response => response.json())
                 .then(data => {
@@ -271,7 +268,6 @@
                 });
         }
 
-        // Select customer function
         function selectCustomer(customer) {
             document.getElementById('customer_name').value = customer.name || '';
             document.getElementById('customer_phone').value = customer.phone || '';
@@ -280,12 +276,10 @@
             closeResults();
         }
 
-        // Close results dropdown
         function closeResults() {
             document.getElementById('customerResults').classList.add('hidden');
         }
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const results = document.getElementById('customerResults');
             const searchContainer = document.querySelector('.search-container');
@@ -295,11 +289,10 @@
             }
         });
 
-        // Calculate due on page load
+        //Calculate due on page load
         document.addEventListener('DOMContentLoaded', function() {
             calculateDue();
             
-            // Auto-search when pressing Enter in search field
             document.getElementById('customer_search').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -310,7 +303,6 @@
     </script>
 
     <style>
-        /* Customizable width - change this value to adjust form width */
         :root {
             --form-width: 500px;
         }
@@ -325,7 +317,6 @@
             position: relative;
         }
 
-        /* Back Button Container - Positioned at top left */
         .back-button-container {
             position: absolute;
             top: 50px;
@@ -386,7 +377,6 @@
             margin-bottom: 20px;
         }
 
-        /* Amount Row */
         .amount-row {
             display: flex;
             gap: 10px;
@@ -397,14 +387,12 @@
             flex: 1;
         }
 
-        /* Form Columns */
         .form-columns {
             display: flex;
             flex-direction: column;
             margin-bottom: 5px;
         }
 
-        /* Customer Search Section */
         .customer-search-section {
             margin-bottom: 15px;
         }
@@ -454,7 +442,6 @@
             background: #b91c1c;
         }
 
-        /* Customer Results Dropdown */
         .customer-results {
             position: absolute;
             top: 100%;
@@ -583,7 +570,6 @@
             min-height: 50px;
         }
 
-        /* Due input specific styling */
         .due-input {
             background-color: #dc2626 !important;
             background: linear-gradient(161deg, rgba(252, 184, 184, 1) 7%, rgba(220, 38, 38, 0.91) 50%, rgba(255, 163, 163, 1) 95%)!important;
