@@ -97,4 +97,31 @@ Route::get('/api/shops/{shop}/customer-summary', function (App\Models\Shop $shop
     ]);
 })->middleware('auth');
 
+
+Route::get('/dashboard', function (Request $request) {
+    $shops = \App\Models\Shop::where('user_id', $request->user()->id)->latest()->get();
+    
+    $today = now()->format('Y-m-d');
+
+    $dailySummary = [
+        'sales' => 0,
+        'total_amount' => 0,
+        'total_due' => 0,
+        'received_amount' => 0
+    ];
+    
+    if ($shops->isNotEmpty()) {
+        foreach ($shops as $shop) {
+            $todayTransactions = $shop->transactions()->whereDate('date', $today)->get();
+            
+            $dailySummary['sales'] += $todayTransactions->count();
+            $dailySummary['total_amount'] += $todayTransactions->sum('total_amount');
+            $dailySummary['total_due'] += $todayTransactions->sum('due_amount');
+            $dailySummary['received_amount'] += $todayTransactions->sum('paid_amount');
+        }
+    }
+    
+    return view('dashboard', compact('shops', 'dailySummary', 'today'));
+})->middleware(['auth', 'verified'])->name('dashboard');
+
 require __DIR__.'/auth.php';

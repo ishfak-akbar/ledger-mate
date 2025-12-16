@@ -125,6 +125,65 @@
                                 </div>
                             @endforeach
                         </div>
+                        <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Daily Summary</h3>
+                                <span class="text-sm text-gray-500">{{ date('F j, Y', strtotime($today)) }}</span>
+                            </div>
+                        <div class="daily-summary-container mb-8">
+                            <div class="daily-summary-grid">
+                                <div class="summary-row">
+                                    <div class="summary-card sales-card">
+                                        <div class="summary-card-icon">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="summary-card-content">
+                                            <div class="summary-card-label">Sales</div>
+                                            <div class="summary-card-value">{{ $dailySummary['sales'] }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="summary-card total-amount-card">
+                                        <div class="summary-card-icon">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="summary-card-content">
+                                            <div class="summary-card-label">Total Amount</div>
+                                            <div class="summary-card-value">Tk. {{ number_format($dailySummary['total_amount'], 2) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <div class="summary-card due-card">
+                                        <div class="summary-card-icon">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="summary-card-content">
+                                            <div class="summary-card-label">Total Due</div>
+                                            <div class="summary-card-value">Tk. {{ number_format($dailySummary['total_due'], 2) }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="summary-card received-card">
+                                        <div class="summary-card-icon">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="summary-card-content">
+                                            <div class="summary-card-label">Received Amount</div>
+                                            <div class="summary-card-value">Tk. {{ number_format($dailySummary['received_amount'], 2) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -280,6 +339,107 @@
             box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
         }
 
+        .daily-summary-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .summary-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .summary-card:hover {
+            box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sales-card {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border-color: #ddd6fe;
+        }
+
+        .sales-card .summary-card-icon {
+            color: #7c3aed;
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .total-amount-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: #93c5fd;
+        }
+
+        .total-amount-card .summary-card-icon {
+            color: #1d4ed8;
+            background: rgba(29, 78, 216, 0.1);
+        }
+
+        .due-card {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #fca5a5;
+        }
+
+        .due-card .summary-card-icon {
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .received-card {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #6ee7b7;
+        }
+
+        .received-card .summary-card-icon {
+            color: #059669;
+            background: rgba(5, 150, 105, 0.1);
+        }
+
+        .summary-card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .summary-card-content {
+            flex: 1;
+        }
+
+        .summary-card-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-card-desc {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+
+
 
         /* Shop Card Styles */
         .shop-cards{
@@ -393,7 +553,7 @@
 
         .view-shop-btn:hover {
             color: #fef2f2; 
-        } 
+        }
 
         @media (max-width: 768px) {
             .shop-cards {
