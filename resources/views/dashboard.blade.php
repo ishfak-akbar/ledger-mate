@@ -480,6 +480,7 @@
         }
 
         .shop-category {
+            height: 27px;
             font-size: 0.75rem;
             font-weight: 600;
             padding: 0.25rem 0.75rem;
