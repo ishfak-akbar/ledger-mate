@@ -37,6 +37,11 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/shops/{shop}/settings', [App\Http\Controllers\ShopController::class, 'settings'])->name('shops.settings');
+    Route::put('/shops/{shop}/settings', [App\Http\Controllers\ShopController::class, 'updateSettings'])->name('shops.settings.update');
+});
+
 Route::get('/api/shops/{shop}/search-customers', function (App\Models\Shop $shop) {
     if ($shop->user_id !== Auth::id()) {
         return response()->json([], 403);

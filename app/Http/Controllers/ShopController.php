@@ -136,4 +136,23 @@ class ShopController extends Controller
         return redirect()->route('dashboard')
             ->with('success', 'Shop "' . $shop->name . '" has been deleted successfully.');
     }
+
+    public function settings(Shop $shop)
+    {
+        return view('shops.settings', compact('shop'));
+    }
+
+    public function updateSettings(Request $request, Shop $shop)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:retail,restaurant,grocery,other',
+            'address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $shop->update($validated);
+
+        return redirect()->route('shops.show', $shop)->with('success', 'Shop settings updated successfully!');
+    }
 }
