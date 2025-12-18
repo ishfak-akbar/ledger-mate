@@ -11,8 +11,18 @@
         </div>
         <div class="main-content-area">
             @if(session('success'))
-                <div class="success-message">
-                    {{ session('success') }}
+                <div id="successMessage" class="success-message">
+                    <span>{{ session('success') }}</span>
+                    <button onclick="this.parentElement.style.display='none'" style="
+                        background: none;
+                        border: none;
+                        color: #059669;
+                        cursor: pointer;
+                        font-size: 18px;
+                        padding: 0;
+                        margin-left: 10px;
+                        line-height: 1;
+                    ">×</button>
                 </div>
             @endif
 
@@ -406,12 +416,36 @@
             transform: translateY(-1px);
         }
 
+        /* SUCCESS MESSAGE - MODIFIED */
         .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            min-width: 300px;
             margin-bottom: 24px;
-            padding: 16px;
+            padding: 12px 16px;
             background-color: #d1fae5;
             color: var(--color-green-dark);
             border-radius: 8px;
+            border-left: 4px solid #059669;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .stats-grid {
