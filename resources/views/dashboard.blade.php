@@ -61,8 +61,9 @@
                     @else
                         <div class="flex justify-between items-center mb-8">
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-800 mb-2">My Shops ({{ $shops->count() }})</h3>
+                                <h3 class="text-lg font-semibold text-gray-800">My Shops ({{ $shops->count() }})</h3>
                             </div>
+                            <div style="width:77%; height:0.6px; background:#d4c3c3; margin:16px 0;"></div>
                             <a href="{{ route('shops.create') }}" 
                                class="add-another-shop-btn">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -127,6 +128,7 @@
                         </div>
                         <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-semibold text-gray-800">Daily Summary</h3>
+                                <div style="width:76%; height:0.6px; background:#d4c3c3; margin:16px 0;"></div>
                                 <span class="text-sm text-gray-500">{{ date('F j, Y', strtotime($today)) }}</span>
                             </div>
                         <div class="daily-summary-container mb-8">
