@@ -18,7 +18,6 @@
         
         body {
             font-family: 'Instrument Sans', sans-serif;
-            /* Original white background with pink tint */
             background: #ffffff;
             min-height: 100vh;
             display: flex;
