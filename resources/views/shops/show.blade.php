@@ -378,6 +378,35 @@
                                     <div style="font-size: 1.125rem; font-weight: 700; color: #dc2626;" id="customer_due_amount">৳ 0.00</div>
                                 </div>
                             </div>
+                            <div id="smsContainer" style="display: none; margin-top: 17px;">
+                                <button type="button" 
+                                        onclick="sendSMSReminder()"
+                                        style="
+                                            width: 100%;
+                                            padding: 8px 10px;
+                                            background-color: #dc2626;
+                                            color: white;
+                                            border: none;
+                                            border-radius: 6px;
+                                            cursor: pointer;
+                                            font-weight: 500;
+                                            transition: background-color 0.2s;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            gap: 8px;
+                                        "
+                                        onmouseover="this.style.backgroundColor='#b91c1c'"
+                                        onmouseout="this.style.backgroundColor='#dc2626'">
+                                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                    </svg>
+                                    Send SMS Reminder
+                                </button>
+                                <p style="font-size: 11px; color: #6b7280; margin-top: 4px; text-align: center;">
+                                    Sends an SMS to remind about pending dues
+                                </p>
+                            </div>
                         </div>
 
                         <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
@@ -1167,22 +1196,25 @@
         async function selectDueCustomer(customer) {
             console.log('Selecting customer:', customer);
             
-            //Display selected customer info
             document.getElementById('selected_customer_name').textContent = customer.name || 'Not provided';
             document.getElementById('selected_customer_phone').textContent = customer.phone || 'Not provided';
             document.getElementById('selected_customer_address').textContent = customer.address || 'Not provided';
             
-            //Set hidden form fields
             document.getElementById('modal_customer_name').value = customer.name || '';
             document.getElementById('modal_customer_phone').value = customer.phone || '';
             document.getElementById('modal_customer_address').value = customer.address || '';
             
             closeDueResults();
             
-            //Fetch customer financial summary
             await fetchCustomerFinancialSummary(customer.name, customer.phone);
             
-            // Show details step
+            const smsContainer = document.getElementById('smsContainer');
+            if (customer.phone && customer.phone !== 'Not provided') {
+                smsContainer.style.display = 'block';
+            } else {
+                smsContainer.style.display = 'none';
+            }
+            
             document.getElementById('searchStep').style.display = 'none';
             document.getElementById('detailsStep').style.display = 'block';
             document.getElementById('backButton').style.display = 'block';
@@ -1191,33 +1223,27 @@
 
         async function fetchCustomerFinancialSummary(customerName, customerPhone) {
             try {
-                //Fetch customer's transaction summary
                 const response = await fetch(`/api/shops/{{ $shop->id }}/customer-summary?name=${encodeURIComponent(customerName)}&phone=${encodeURIComponent(customerPhone)}`);
                 const summary = await response.json();
                 
                 console.log('Customer summary:', summary);
                 
-                //Calculate due amount (total - paid)
                 const total = parseFloat(summary.total || 0);
                 const paid = parseFloat(summary.paid || 0);
                 const due = total - paid;
                 
-                //Update UI with financial summary
                 document.getElementById('customer_total_amount').textContent = `৳ ${total.toFixed(2)}`;
                 document.getElementById('customer_paid_amount').textContent = `৳ ${paid.toFixed(2)}`;
                 document.getElementById('customer_due_amount').textContent = `৳ ${due.toFixed(2)}`;
                 
-                //Set max payment amount
                 document.getElementById('clear_due_amount').max = due;
                 document.getElementById('max_due_amount').textContent = `৳ ${due.toFixed(2)}`;
                 
-                //Update hidden form fields
                 document.getElementById('total_amount_field').value = 0;
                 document.getElementById('due_amount_field').value = 0;
                 
             } catch (error) {
                 console.error('Error fetching customer summary:', error);
-                //Set default values
                 document.getElementById('customer_total_amount').textContent = '৳ 0.00';
                 document.getElementById('customer_paid_amount').textContent = '৳ 0.00';
                 document.getElementById('customer_due_amount').textContent = '৳ 0.00';
@@ -1355,7 +1381,7 @@
             submitButton.style.cursor = 'not-allowed';
         }
 
-        // Toast Notification Functions
+        //Toast Notification Functions
         function showToast(message, type = 'success', duration = 5000) {
             const toastContainer = document.getElementById('toastContainer');
             
@@ -1456,5 +1482,48 @@
                 closeDeleteModal();
             }
         });
+        function sendSMSReminder() {
+            const customerPhoneElement = document.getElementById('selected_customer_phone');
+            const customerNameElement = document.getElementById('selected_customer_name');
+            const dueAmountElement = document.getElementById('customer_due_amount');
+            
+            //Get text content
+            const customerPhone = customerPhoneElement ? customerPhoneElement.textContent.trim() : '';
+            const customerName = customerNameElement ? customerNameElement.textContent.trim() : '';
+            const dueAmount = dueAmountElement ? dueAmountElement.textContent.trim() : '';
+            
+            console.log('SMS Details:', { customerPhone, customerName, dueAmount });
+            
+            //Check if phone number is available
+            if (!customerPhone || customerPhone === 'Not provided' || customerPhone === '') {
+                alert('Customer phone number is not available. Cannot send SMS.');
+                return;
+            }
+            
+            //Clean and format the phone number
+            let formattedPhone = customerPhone.replace(/\D/g, ''); 
+            
+            if (!formattedPhone.startsWith('+') && !formattedPhone.startsWith('00')) {
+                if (formattedPhone.length === 11 && formattedPhone.startsWith('01')) {
+                    formattedPhone = '+880' + formattedPhone.substring(1);
+                } else if (formattedPhone.length === 10 && formattedPhone.startsWith('1')) {
+                    formattedPhone = '+880' + formattedPhone;
+                } else {
+                    formattedPhone = '+' + formattedPhone;
+                }
+            }
+            
+            console.log('Formatted Phone:', formattedPhone);
+            
+            const message = `Hello${customerName && customerName !== 'Not provided' ? ' ' + customerName : ''}! You have pending dues of ${dueAmount}. Please make payment at your earliest convenience. - LedgerMate`;
+            
+            const smsLink = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
+            
+            console.log('SMS Link:', smsLink);
+            
+            window.open(smsLink, '_blank');
+            
+            showToast(`SMS reminder opened for ${customerName || 'customer'}`, 'info', 3000);
+        }
     </script>
 </x-app-layout>
