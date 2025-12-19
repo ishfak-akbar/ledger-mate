@@ -127,19 +127,42 @@
                 <div class="grid-card-span-1 p-6 md:p-8 bg-white border-l border-gray-100">
                     <h3 class="section-title" style="margin-top: 6px;">Quick Tools</h3>
                     
-                    <div class="space-y-4">
-                        <a href="{{ route('transactions.create', $shop) }}" class="action-btn red-btn text-red-600 border-red-200" style="margin: 12px 0px;">
+                    <div class="space-y-2">
+                        <a href="{{ route('transactions.create', $shop) }}" class="action-btn red-btn text-red-600 border-red-200" style="margin: 6px 0px;">
                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             Add New Transaction
                         </a>
-
                         <a href="{{ route('transactions.index', $shop) }}" class="action-btn text-blue-600 hover:bg-blue-50 border-blue-200" style="margin: 12px 0px;">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
                             View Transactions
+                        </a>
+                        <a href="{{ route('supplier-transactions.index', $shop) }}" class="action-btn purple-btn"
+                        style="
+                                display: flex;
+                                align-items: center;
+                                width: 100%;
+                                padding: 12px 16px;
+                                font-weight: 600;
+                                border-radius: 8px;
+                                border: 1px solid #8b5cf6;
+                                text-decoration: none;
+                                transition: all 0.2s;
+                                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                                color: #8b5cf6;
+                                margin: 12px 0px;
+                                cursor: pointer;
+                        "><svg style="width: 20px; height: 20px; margin-right: 10px; color: #8b5cf6;" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24" 
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Supplier Transactions
                         </a>
                         
                         <button onclick="openClearDueModal()" class="action-btn text-green-600 hover:bg-green-50 border-green-200" style="margin: 12px 0px; width: 100%; border: 1px solid; cursor: pointer;">
@@ -150,9 +173,9 @@
                         </button>
                     </div>
 
-                    <div class="bg-gray-50" style="margin-top: 20px; border-top: 1px solid #ddd;">
+                    <div class="bg-gray-50" style="margin-top: 5px; border-top: 1px solid #ddd;">
                         {{-- Payment Status Counts --}}
-                        <div class="bg-white p-4 rounded-lg shadow-sm" style="border: 1px solid #ffc7c7; width: 100%; margin: 10px 0px; margin-top: 20px;">
+                        <div class="bg-white p-4 rounded-lg shadow-sm" style="border: 1px solid #ffc7c7; width: 100%; margin: 10px 0px;">
                             <h4 class="subsection-title-red">Payment Status</h4>
                             <div class="space-y-3">
                                 <div class="flex justify-between text-sm">
@@ -184,7 +207,7 @@
                         </div>
                         
                         <button onclick="openDeleteModal()" 
-                                class="delete-shop-btn" style="margin: 20px 0px 5px; display: flex; align-items: center; gap: 2px; width: 100%; font-size: 13px;">
+                                class="delete-shop-btn" style="margin: 12px 0px 5px; display: flex; align-items: center; gap: 2px; width: 100%; font-size: 13px;">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -365,17 +388,17 @@
                             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
                                 <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
                                     <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Total</div>
-                                    <div style="font-size: 1.125rem; font-weight: 700; color: #10b981;" id="customer_total_amount">৳ 0.00</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #10b981;" id="customer_total_amount">Tk.  0.00</div>
                                 </div>
                                 
                                 <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
                                     <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Paid</div>
-                                    <div style="font-size: 1.125rem; font-weight: 700; color: #3b82f6;" id="customer_paid_amount">৳ 0.00</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #3b82f6;" id="customer_paid_amount">Tk.  0.00</div>
                                 </div>
                                 
                                 <div style="text-align: center; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
                                     <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 4px;">Due</div>
-                                    <div style="font-size: 1.125rem; font-weight: 700; color: #dc2626;" id="customer_due_amount">৳ 0.00</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; color: #dc2626;" id="customer_due_amount">Tk.  0.00</div>
                                 </div>
                             </div>
                             <div id="smsContainer" style="display: none; margin-top: 17px;">
@@ -415,11 +438,11 @@
                             <div style="margin-bottom: 16px;">
                                 <label for="clear_due_amount" style="display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px;">
                                     Payment Amount *
-                                    <span style="font-size: 0.75rem; color: #6b7280;">(Maximum: <span id="max_due_amount" style="font-weight: 600;">৳ 0.00</span>)</span>
+                                    <span style="font-size: 0.75rem; color: #6b7280;">(Maximum: <span id="max_due_amount" style="font-weight: 600;">Tk.  0.00</span>)</span>
                                 </label>
                                 <div style="position: relative;">
                                     <div style="position: absolute; inset-block-start: 0; inset-inline-start: 0; padding-left: 12px; height: 100%; display: flex; align-items: center; pointer-events: none;">
-                                        <span style="color: #6b7280; font-size: 0.875rem;">৳</span>
+                                        <span style="color: #6b7280; font-size: 0.875rem;">Tk. </span>
                                     </div>
                                     <input 
                                         type="number" 
@@ -651,6 +674,7 @@
         }
 
         .shop-grid-container {
+            width: 100%;
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -660,13 +684,14 @@
         }
 
         .grid-card-span-2 {
-            width: 70%;
+            width: 75%;
         }
         .grid-card-span-3 {
             width: 100%;
         }
         .grid-card-span-1 {
             width: 25%;
+            margin-left: auto;
         }
 
       
@@ -675,7 +700,7 @@
             color: #1f2937;
             padding-bottom: 8px; 
             border-bottom: 1px solid #ddd;
-            margin-bottom: 24px; 
+            margin-bottom: 14px; 
         }
 
        
@@ -1010,6 +1035,14 @@
             background-color: #fff0f0 ;
         }
 
+        .purple-btn{
+            background-color: white;
+        }
+
+        .action-btn.purple-btn:hover{
+            background-color: #f6f2ff;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .shop-grid-container {
@@ -1232,22 +1265,22 @@
                 const paid = parseFloat(summary.paid || 0);
                 const due = total - paid;
                 
-                document.getElementById('customer_total_amount').textContent = `৳ ${total.toFixed(2)}`;
-                document.getElementById('customer_paid_amount').textContent = `৳ ${paid.toFixed(2)}`;
-                document.getElementById('customer_due_amount').textContent = `৳ ${due.toFixed(2)}`;
+                document.getElementById('customer_total_amount').textContent = `Tk.  ${total.toFixed(2)}`;
+                document.getElementById('customer_paid_amount').textContent = `Tk.  ${paid.toFixed(2)}`;
+                document.getElementById('customer_due_amount').textContent = `Tk.  ${due.toFixed(2)}`;
                 
                 document.getElementById('clear_due_amount').max = due;
-                document.getElementById('max_due_amount').textContent = `৳ ${due.toFixed(2)}`;
+                document.getElementById('max_due_amount').textContent = `Tk.  ${due.toFixed(2)}`;
                 
                 document.getElementById('total_amount_field').value = 0;
                 document.getElementById('due_amount_field').value = 0;
                 
             } catch (error) {
                 console.error('Error fetching customer summary:', error);
-                document.getElementById('customer_total_amount').textContent = '৳ 0.00';
-                document.getElementById('customer_paid_amount').textContent = '৳ 0.00';
-                document.getElementById('customer_due_amount').textContent = '৳ 0.00';
-                document.getElementById('max_due_amount').textContent = '৳ 0.00';
+                document.getElementById('customer_total_amount').textContent = 'Tk.  0.00';
+                document.getElementById('customer_paid_amount').textContent = 'Tk.  0.00';
+                document.getElementById('customer_due_amount').textContent = 'Tk.  0.00';
+                document.getElementById('max_due_amount').textContent = 'Tk.  0.00';
             }
         }
 
@@ -1258,7 +1291,7 @@
             const submitButton = document.getElementById('clearDueSubmit');
             
             if (paymentAmount > maxDue) {
-                amountHint.innerHTML = `<span style="color: #dc2626;">Payment amount cannot exceed due amount of ৳ ${maxDue.toFixed(2)}</span>`;
+                amountHint.innerHTML = `<span style="color: #dc2626;">Payment amount cannot exceed due amount of Tk.  ${maxDue.toFixed(2)}</span>`;
                 submitButton.disabled = true;
                 submitButton.style.backgroundColor = '#9ca3af';
                 submitButton.style.cursor = 'not-allowed';
@@ -1268,7 +1301,7 @@
                 submitButton.style.backgroundColor = '#9ca3af';
                 submitButton.style.cursor = 'not-allowed';
             } else {
-                amountHint.textContent = `Clearing ৳ ${paymentAmount.toFixed(2)} of ৳ ${maxDue.toFixed(2)} due`;
+                amountHint.textContent = `Clearing Tk.  ${paymentAmount.toFixed(2)} of Tk.  ${maxDue.toFixed(2)} due`;
                 submitButton.disabled = false;
                 submitButton.style.backgroundColor = '#10b981';
                 submitButton.style.cursor = 'pointer';
@@ -1340,7 +1373,7 @@
                     
                     if (paymentAmount > maxDue) {
                         e.preventDefault();
-                        alert(`Payment amount cannot exceed due amount of ৳ ${maxDue.toFixed(2)}`);
+                        alert(`Payment amount cannot exceed due amount of Tk.  ${maxDue.toFixed(2)}`);
                         return;
                     }
                     
@@ -1350,7 +1383,7 @@
                         return;
                     }
                     
-                    const confirmationMessage = `Create due clearance transaction for ${customerName}?\n\nAmount: ৳ ${paymentAmount.toFixed(2)}\nPayment Method: ${paymentMethod}`;
+                    const confirmationMessage = `Create due clearance transaction for ${customerName}?\n\nAmount: Tk.  ${paymentAmount.toFixed(2)}\nPayment Method: ${paymentMethod}`;
                     
                     if (!confirm(confirmationMessage)) {
                         e.preventDefault();
