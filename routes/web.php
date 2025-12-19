@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/shops/{shop}/settings', [App\Http\Controllers\ShopController::class, 'settings'])->name('shops.settings');
     Route::put('/shops/{shop}/settings', [App\Http\Controllers\ShopController::class, 'updateSettings'])->name('shops.settings.update');
+    Route::put('/shops/{shop}/settings', [ShopController::class, 'updateSettings'])->name('shops.settings.update');
 });
 
 Route::middleware(['auth'])->group(function () {

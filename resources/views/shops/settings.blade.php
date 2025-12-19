@@ -41,16 +41,16 @@
                     <div class="form-group">
                         <label>Category</label>
                         <select name="category">
-                            <option value="retail" {{ old('category') == 'retail' ? 'selected' : '' }}>Retail</option>
-                            <option value="wholesale" {{ old('category') == 'wholesale' ? 'selected' : '' }}>Wholesale</option>
-                            <option value="restaurant" {{ old('category') == 'restaurant' ? 'selected' : '' }}>Restaurant</option>
-                            <option value="cafe" {{ old('category') == 'cafe' ? 'selected' : '' }}>Cafe</option>
-                            <option value="grocery" {{ old('category') == 'grocery' ? 'selected' : '' }}>Grocery</option>
-                            <option value="electronics" {{ old('category') == 'electronics' ? 'selected' : '' }}>Electronics</option>
-                            <option value="clothing" {{ old('category') == 'clothing' ? 'selected' : '' }}>Clothing</option>
-                            <option value="pharmacy" {{ old('category') == 'pharmacy' ? 'selected' : '' }}>Pharmacy</option>
-                            <option value="hardware" {{ old('category') == 'hardware' ? 'selected' : '' }}>Hardware</option>
-                            <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Other</option>
+                            <option value="retail" {{ (old('category', $shop->category) == 'retail') ? 'selected' : '' }}>Retail</option>
+                            <option value="wholesale" {{ (old('category', $shop->category) == 'wholesale') ? 'selected' : '' }}>Wholesale</option>
+                            <option value="restaurant" {{ (old('category', $shop->category) == 'restaurant') ? 'selected' : '' }}>Restaurant</option>
+                            <option value="cafe" {{ (old('category', $shop->category) == 'cafe') ? 'selected' : '' }}>Cafe</option>
+                            <option value="grocery" {{ (old('category', $shop->category) == 'grocery') ? 'selected' : '' }}>Grocery</option>
+                            <option value="electronics" {{ (old('category', $shop->category) == 'electronics') ? 'selected' : '' }}>Electronics</option>
+                            <option value="clothing" {{ (old('category', $shop->category) == 'clothing') ? 'selected' : '' }}>Clothing</option>
+                            <option value="pharmacy" {{ (old('category', $shop->category) == 'pharmacy') ? 'selected' : '' }}>Pharmacy</option>
+                            <option value="hardware" {{ (old('category', $shop->category) == 'hardware') ? 'selected' : '' }}>Hardware</option>
+                            <option value="other" {{ (old('category', $shop->category) == 'other') ? 'selected' : '' }}>Other</option>
                         </select>
                         @error('category')
                             <p class="error-msg">{{ $message }}</p>

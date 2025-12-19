@@ -146,7 +146,7 @@ class ShopController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:retail,restaurant,grocery,other',
+            'category' => 'required|in:retail,wholesale,restaurant,cafe,grocery,electronics,clothing,pharmacy,hardware,other',
             'address' => 'nullable|string|max:500',
             'notes' => 'nullable|string|max:1000',
         ]);
