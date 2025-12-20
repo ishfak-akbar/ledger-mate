@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="transaction-container">
         <div class="back-button-container">
-            <a href="{{ route('shops.show', $shop) }}" class="back-header-btn">
+            <a href="{{ route('supplier-transactions.index', $shop) }}" class="back-header-btn">
                 <span class="back-icon"><</span>
                 <div class="header-titles">
                     <span class="shop-name-title">{{ $shop->name }}</span>
@@ -251,18 +251,6 @@
             }
             
             document.getElementById('due_amount').value = due.toFixed(2);
-            
-            const dueInput = document.getElementById('due_amount');
-            if (due > 0) {
-                dueInput.style.background = 'linear-gradient(161deg, rgba(252, 184, 184, 1) 7%, rgba(220, 38, 38, 0.91) 50%, rgba(255, 163, 163, 1) 95%)!important';
-                dueInput.style.color = '#ffffff';
-            } else if (due < 0) {
-                dueInput.style.background = 'linear-gradient(161deg, rgba(184, 252, 196, 1) 7%, rgba(38, 220, 100, 0.91) 50%, rgba(163, 255, 173, 1) 95%)!important';
-                dueInput.style.color = '#064e3b';
-            } else {
-                dueInput.style.background = '#f3f4f6';
-                dueInput.style.color = '#6b7280';
-            }
         }
 
         function updateAmountLabels() {
@@ -718,10 +706,11 @@
         }
 
         .due-input {
-            background-color: #f3f4f6;
-            color: #6b7280;
+            background-color: #dc2626 !important;
+            background: linear-gradient(161deg, rgba(252, 184, 184, 1) 7%, rgba(220, 38, 38, 0.91) 50%, rgba(255, 163, 163, 1) 95%)!important;
+            color: #ffffff;
             font-weight: 600;
-            border-color: #d1d5db;
+            border-color: #dc2626;
         }
 
         .error-input {
