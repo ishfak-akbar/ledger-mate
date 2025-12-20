@@ -132,7 +132,7 @@
                                     <tr class="table-row">
                                         <td class="table-td text-nowrap">
                                             <div class="text-medium text-default">{{ $transaction->date->format('M d, Y') }}</div>
-                                            <div class="text-xs text-gray-medium">{{ $transaction->date->format('h:i A') }}</div>
+                                            <div class="text-xs text-gray-medium">{{ $transaction->created_at->format('h:i A') }}</div>
                                         </td>
                                         <td class="table-td">
                                             <div class="text-medium text-default">{{ $transaction->customer_name ?: 'Walk-in' }}</div>
