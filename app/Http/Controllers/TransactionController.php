@@ -31,9 +31,9 @@ class TransactionController extends Controller
         //Common validation rules
         $validationRules = [
             'paid_amount' => 'required|numeric|min:0',
-            'customer_name' => 'nullable|string|max:100',
-            'customer_phone' => 'nullable|string|max:20',
-            'customer_address' => 'nullable|string',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'customer_address' => 'required|string|max:500',
             'description' => 'nullable|string',
             'payment_method' => 'required|in:cash,card,bank_transfer,upi,cheque'
         ];
@@ -120,7 +120,7 @@ class TransactionController extends Controller
             $query->where('payment_method', $paymentMethod);
         }
         
-        $transactions = $query->latest()->paginate(20);
+        $transactions = $query->latest()->paginate(10);
         
         //Calculate stats based on ALL transactions
         $stats = [
