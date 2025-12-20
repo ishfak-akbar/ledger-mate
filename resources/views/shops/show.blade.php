@@ -71,7 +71,7 @@
                         </div>
                         <div class="stat-box stat-box-reddish">
                             <div class="stat-label">Total Due</div>
-                            <div class="stat-value">Tk. {{ number_format($totalAmount, 2) - number_format($paidAmount, 2)}}</div>
+                            <div class="stat-value">Tk. {{ number_format($totalAmount - $paidAmount, 2) }}</div>
                             <div class="stat-icon">⏳</div>
                         </div>
                     </div>
