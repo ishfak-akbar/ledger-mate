@@ -176,6 +176,13 @@
         box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
     }
 
+    .wrong-credentials{
+        margin-bottom: 5px;
+        color:#dc2626;
+        font-size: 11px;
+        
+    }
+
     .checkbox-line {
         display: flex;
         justify-content: space-between;
@@ -301,14 +308,14 @@
                        class="input @error('email') border-red-500 @enderror" required autofocus>
 
                 @error('email')
-                    <p class="text-red-600 text-xs mt-1 mb-2">{{ $message }}</p>
+                    <p class="wrong-credentials">*{{ $message }}*</p>
                 @enderror
 
                 <input type="password" name="password" placeholder="Password"
                        class="input @error('password') border-red-500 @enderror" required>
 
                 @error('password')
-                    <p class="text-red-600 text-xs mt-1 mb-2">{{ $message }}</p>
+                    <p class="wrong-credentials">*{{ $message }}*</p>
                 @enderror
 
                 <div class="checkbox-line">
