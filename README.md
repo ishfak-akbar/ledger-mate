@@ -126,6 +126,52 @@ php artisan serve
 
 ---
 
+# 📘 User Guide for LedgerMate
+
+## Getting Started
+
+1. **Register or Login**  
+   Visit the welcome page and create an account or log in.
+
+2. **Create Your First Shop**  
+   After login, go to the dashboard and click **"Add New Shop"**. Fill in shop name, category, address, and notes.
+
+3. **Add Transactions**  
+   From the shop details page:  
+   - Click **"Add New Transaction"**  
+   - Enter total amount, paid amount (due auto-calculates)  
+   - Fill customer name, phone, address (**required**)  
+   - Select payment method and add description/note  
+   - Submit to record the sale
+
+4. **View Transactions**  
+   Click **"View Transactions"** on shop page to see the full list with search, filters, and pagination (10 per page).
+
+5. **Edit Shop Settings**  
+   From the navbar profile dropdown, click **"Shop Settings"** to update shop name, category, address, and notes.
+
+6. **Clear Due Payments**  
+   Use the **"Clear Due Payment"** button on the shop page to search and pay outstanding customer dues.
+
+7. **Print Receipts**  
+   Click the print icon on any transaction to view and print a clean receipt.
+
+8. **Edit Profile**  
+   Go to **Profile Settings** (from navbar dropdown) to update name/email, change password, or delete account.
+
+9. **Manage Suppliers**
+   Add supplier transactions for purchases, payments, and returns.
+   
+## Tips
+
+- Use the back button (←) to navigate.  
+- All financial summaries update in real-time.  
+- Responsive — works great on mobile!
+
+Enjoy using smart ledger! 🚀
+
+---
+
 ## 🔮 Future Improvements
 
 📈 **Advanced Analytics & Reporting** – Comprehensive financial insights, profit/loss statements, and custom reports  
